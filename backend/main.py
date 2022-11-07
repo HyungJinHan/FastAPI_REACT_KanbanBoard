@@ -1,20 +1,20 @@
 from fastapi import FastAPI
-# from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# origins = {
-#     "http://localhost",
-#     "http://localhost:3000",
-# }
+origins = {
+    "http://localhost",
+    "http://localhost:3000",
+}
 
-# app.add_middleware(
-#    CORSMiddleware,
-#     allow_origins = origins,
-#     allow_credentials =True,
-#     allow_methods = ["*"],
-#     allow_headers= ["*"],
-# )
+app.add_middleware(
+   CORSMiddleware,
+    allow_origins = origins,
+    allow_credentials =True,
+    allow_methods = ["*"],
+    allow_headers= ["*"],
+)
 
 @app.get('/board')
 
@@ -29,12 +29,12 @@ def get_board():
     'columns': {
       'column-1': {
         'id': 'column-1',
-        'title': 'To Do',
+        'title': 'To Do 🤞',
         'taskIds': ['task-1', 'task-2']
       },
       'column-2': {
         'id': 'column-2',
-        'title': 'Doing',
+        'title': 'Doing 🚶',
         'taskIds': ['task-3', 'task-4']
       }
     },
