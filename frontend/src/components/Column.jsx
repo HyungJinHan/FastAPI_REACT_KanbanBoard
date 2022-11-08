@@ -2,6 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import Task from './Task';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
+import AddTask from './AddTask';
 
 const Container = styled.div`
   margin: 8px;
@@ -24,6 +25,31 @@ const TaskList = styled.div`
 `;
 
 function Column(props) {
+  function deleteColumn(columnId, index) {
+    const columnTasks = props.board.columns[columnId].taskIds;
+
+    const finalTasks = columnTasks.reduce((previousValue, currentaValue) => {
+      const { [currentaValue]: oldTask, ...newTasks } = previousValue;
+      return newTasks;
+    }, props.board.tasks);
+
+    const columns = props.board.columns;
+    const { [columnId]: oldColumn, ...newColumns } = columns;
+
+    const newColumnOrder = Array.from(props.board.columnOrder);
+    newColumnOrder.splice(index, 1);
+
+    props.setBoard({
+      tasks: {
+        ...finalTasks
+      },
+      columns: {
+        ...newColumns
+      },
+      columnOrder: newColumnOrder
+    });
+  }
+
   return (
     <Draggable draggableId={props.column.id} index={props.index}>
       {provided => (
@@ -38,6 +64,7 @@ function Column(props) {
                   ))
                 }
                 {provided.placeholder}
+                <AddTask columnId={props.column.id} board={props.board} setBoard={props.setBoard} />
               </TaskList>
             )}
           </Droppable>

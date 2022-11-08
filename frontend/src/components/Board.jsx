@@ -4,6 +4,7 @@ import { useState } from 'react';
 import styled from 'styled-components'
 import Column from './Column';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd'
+import AddColumn from './AddColumn';
 
 const Container = styled.div`
   display: flex;
@@ -62,7 +63,7 @@ function Board(props) {
     const finish = board.columns[destination.droppableId];
 
     if (start === finish) {
-      const newTaskIds = Array.from(start.tastIds);
+      const newTaskIds = Array.from(start.taskIds);
       newTaskIds.splice(source.index, 1);
       newTaskIds.splice(destination.index, 0, draggableId);
 
@@ -82,10 +83,38 @@ function Board(props) {
       return;
     }
     // 큰 보드 내의 내용 드래그 & 드랍 후 자리 유지하는 작업
+
+    const startTaskIds = Array.from(start.taskIds);
+    startTaskIds.splice(source.index, 1);
+
+    const newStartColumn = {
+      ...start,
+      taskIds: startTaskIds
+    }
+
+    const finishTaskIds = Array.from(finish.taskIds);
+    finishTaskIds.splice(destination.index, 0, draggableId);
+
+    const newFinishColumn = {
+      ...finish,
+      taskIds: finishTaskIds
+    }
+
+    setBoard({
+      ...board,
+      columns: {
+        ...board.columns,
+        [newStartColumn.id]: newStartColumn,
+        [newFinishColumn.id]: newFinishColumn
+      }
+    });
+
+    return;
   }
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
+      <AddColumn board={board} setBoard={setBoard} />
       <Droppable droppableId='all-columns' direction='horizontal' type='column'>
         {provided => (
           <Container {...provided.droppableProps} ref={provided.innerRef}>
@@ -93,7 +122,7 @@ function Board(props) {
               board.columnOrder.map((columnId, index) => {
                 const column = board.columns[columnId];
                 const tasks = column.taskIds.map(taskIds => board.tasks[taskIds]);
-                return <Column key={column.id} column={column} tasks={tasks} index={index} />;
+                return <Column key={column.id} column={column} tasks={tasks} index={index} board={board} setBoard={setBoard} />;
               })
             }
             {provided.placeholder}
