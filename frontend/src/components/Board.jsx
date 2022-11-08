@@ -33,8 +33,55 @@ function Board(props) {
     return data.board;
   }
 
-  function onDragEnd() {
-    alert('Dropped')
+  function onDragEnd(result) {
+    const { destination, source, draggableId, type } = result;
+
+    if (!destination) {
+      return;
+    }
+
+    if (destination.droppableId === source.droppableId && destination.index === source.index) {
+      return;
+    }
+
+    if (type === 'column') {
+      const newColumnOrder = Array.from(board.columnOrder);
+      newColumnOrder.splice(source.index, 1);
+      newColumnOrder.splice(destination.index, 0, draggableId);
+
+      setBoard({
+        ...board,
+        columnOrder: newColumnOrder
+      })
+
+      return;
+    }
+    // 큰 보드 드래그 & 드랍 후 자리 유지하는 작업
+
+    const start = board.columns[source.droppableId];
+    const finish = board.columns[destination.droppableId];
+
+    if (start === finish) {
+      const newTaskIds = Array.from(start.tastIds);
+      newTaskIds.splice(source.index, 1);
+      newTaskIds.splice(destination.index, 0, draggableId);
+
+      const newColumn = {
+        ...start,
+        taskIds: newTaskIds
+      }
+
+      setBoard({
+        ...board,
+        columns: {
+          ...board.columns,
+          [newColumn.id]: newColumn
+        }
+      });
+
+      return;
+    }
+    // 큰 보드 내의 내용 드래그 & 드랍 후 자리 유지하는 작업
   }
 
   return (
