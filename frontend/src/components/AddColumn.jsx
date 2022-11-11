@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 function AddColumn(props) {
   const [showNewColumnButton, setShowNewColumnButton] = useState(true);
   const [value, setValue] = useState('');
+  const newRef = useRef();
 
   function addNewColumn(title) {
     const newColumnId = 'column-' + Math.floor(Math.random() * 1000000);
@@ -37,14 +38,29 @@ function AddColumn(props) {
     <div>
       {
         showNewColumnButton ?
-          <button onClick={() => setShowNewColumnButton(false)}>New Column</button> :
+          <button
+             onClick={
+              async () => {
+                await setShowNewColumnButton(false);
+                await newRef.current.focus();
+              }
+             }
+          >New Column</button> :
           <input
             type='text'
+            ref={newRef}
             value={value}
             onChange={
               (e) => setValue(e.target.value)
             }
             onBlur={handleInputComplete}
+            onKeyPress={
+              (e) => {
+                if (e.key === 'Enter') {
+                  handleInputComplete()
+                }
+              }
+            }
           />
       }
     </div>

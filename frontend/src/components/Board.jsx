@@ -27,11 +27,25 @@ function Board(props) {
     );
   }, []);
 
+  useEffect(() => {
+    saveBoard();
+  }, [board]);
+
   async function fetchBoard() {
     const response = await fetch('http://localhost:8000/board');
     const data = await response.json();
     // console.log(data);
     return data.board;
+  }
+  
+  async function saveBoard() {
+    const response = await fetch('http://localhost:8000/board', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(board)
+    })
   }
 
   function onDragEnd(result) {

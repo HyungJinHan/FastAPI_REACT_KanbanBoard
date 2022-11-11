@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 function AddTask(props) {
   const [showNewTaskButton, setShowNewTaskButton] = useState(true);
   const [value, setValue] = useState('');
+  const newRef = useRef();
 
   function addNewTask(columnId, content) {
     const newTaskId = 'task-' + Math.floor(Math.random() * 1000000);
@@ -45,14 +46,29 @@ function AddTask(props) {
     <div>
       {
         showNewTaskButton ?
-          <button onClick={() => setShowNewTaskButton(false)}>New</button> :
+          <button 
+            onClick={
+              async () => {
+                await setShowNewTaskButton(false);
+                await newRef.current.focus();
+              }
+            }
+          >New</button> :
           <input
+            ref={newRef}
             type='text'
             value={value}
             onChange={
               (e) => setValue(e.target.value)
             }
             onBlur={handleInputComplete}
+            onKeyPress={
+              (e) => {
+                if (e.key === 'Enter') {
+                  handleInputComplete()
+                }
+              }
+            }
           />
       }
     </div>
