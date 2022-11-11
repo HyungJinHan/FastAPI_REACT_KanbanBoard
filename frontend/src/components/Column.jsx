@@ -25,7 +25,7 @@ const TaskList = styled.div`
 `;
 
 function Column(props) {
-  const onRemove = (columnId, index) => {
+  const deleteColumn = (columnId, index) => {
     if(window.confirm('컬럼을 삭제하시겠습니까?')) {
       const columnTasks = props.board.columns[columnId].taskIds;
 
@@ -50,9 +50,9 @@ function Column(props) {
         columnOrder: newColumnOrder
       });
       
-      alert("삭제합니다.");
+      alert("컬럼을 삭제합니다.");
     } else {
-      alert("취소합니다.");
+      alert("삭제를 취소합니다.");
     }
   }
   
@@ -63,7 +63,7 @@ function Column(props) {
         <Container {...provided.draggableProps} ref={provided.innerRef}>
           <Title {...provided.dragHandleProps}>
             {props.column.title}
-            <span onClick={() => onRemove(props.column.id, props.index)}>X</span>
+            <span onClick={() => deleteColumn(props.column.id, props.index)}>X</span>
           </Title>
           <Droppable droppableId={props.column.id} type='task'>
             {provided => (

@@ -12,26 +12,32 @@ const Container = styled.div`
 
 function Task(props) {
   function deleteTask(columnId, index, taskId) {
-    const column = props.board.column[columnId];
-    const newTaskIds = Array.from(column.taskIds);
-    newTaskIds.splice(index, 1);
+    if(window.confirm('내용을 삭제하시겠습니까?')) {
+      const column = props.board.columns[columnId];
+      const newTaskIds = Array.from(column.taskIds);
+      newTaskIds.splice(index, 1);
 
-    const tasks = props.state.tasks;
-    const {[taskId]: oldTask, ...newTasks} = tasks;
+      const tasks = props.board.tasks;
+      const {[taskId]: oldTask, ...newTasks} = tasks;
 
-    props.setBoard({
-      ...props.board,
-      tasks: {
-        ...newTasks
-      },
-      columns: {
-        ...props.board.columns,
-        [columnId]: {
-          ...column,
-          taskIds: newTaskIds
+      props.setBoard({
+        ...props.board,
+        tasks: {
+          ...newTasks
+        },
+        columns: {
+          ...props.board.columns,
+          [columnId]: {
+            ...column,
+            taskIds: newTaskIds
+          }
         }
-      }
-    })
+      });
+
+      alert("내용을 삭제합니다.");
+    } else {
+      alert("삭제를 취소합니다.");
+    }
   }
 
   return (
@@ -39,7 +45,7 @@ function Task(props) {
       {provided => (
         <Container {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
           {props.task.content}
-          <span>&nbsp;&nbsp;X</span>
+          <span onClick={() => deleteTask(props.columnId, props.index, props.task.id)}>&nbsp;&nbsp;X</span>
         </Container>
       )}
     </Draggable>
