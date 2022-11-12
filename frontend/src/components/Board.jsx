@@ -12,14 +12,7 @@ const Container = styled.div`
 
 function Board(props) {
   const initialData = { tasks: {}, columns: {}, columnOrder: [] };
-
   const [board, setBoard] = useState(initialData)
-
-  // const [board, setBoard] = useState({
-  //   tasks: {},
-  //   columns: {},
-  //   columnOrder: []
-  // }); // or useState(initialData)
 
   useEffect(() => {
     fetchBoard().then(
@@ -32,18 +25,23 @@ function Board(props) {
   }, [board]);
 
   async function fetchBoard() {
-    const response = await fetch('http://localhost:8000/board');
+    const response = await fetch('http://localhost:8000/board', {
+      headers: {
+        'Authorization': 'Bearer ' + props.token
+      }
+    });
     const data = await response.json();
     // console.log(data);
     return data.board;
   }
-  
+
   /**나중에 설명 볼때 편한 주석*/
   async function saveBoard() {
     const response = await fetch('http://localhost:8000/board', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + props.token
       },
       body: JSON.stringify(board)
     });

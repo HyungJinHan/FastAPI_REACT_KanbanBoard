@@ -63,14 +63,29 @@ UserIn_Pydantic = pydantic_model_creator(User, name='UserIn', exclude_readonly=T
 
 async def authenticate_user(username: str, password: str):
   user = await User.get(username=username)
+
   if not user:
     return False
   if not user.verify_password(password):
     return False
   return user
 
+oauth_scheme = OAuth2PasswordBearer(tokenUrl='token')
+
+async def get_current_user(token: str = Depends(oauth_scheme)):
+  try:
+    payload = jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    user = await User.get(id=payload.get('id'))
+  except:
+    raise HTTPException(
+      status_code=status.HTTP_401_UNAUTHORIZED,
+      detail='Invaild Username or Password'
+    )
+
+  return await User_Pydantic.from_tortoise_orm(user)
+
 @app.get('/board')
-async def get_board():
+async def get_board(): # user: User_Pydantic = Depends(get_current_user)
   user = await User.get(id=1)
   return {'board': user.board}
 
