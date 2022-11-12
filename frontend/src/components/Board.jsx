@@ -38,6 +38,7 @@ function Board(props) {
     return data.board;
   }
   
+  /**나중에 설명 볼때 편한 주석*/
   async function saveBoard() {
     const response = await fetch('http://localhost:8000/board', {
       method: 'POST',
@@ -45,7 +46,7 @@ function Board(props) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(board)
-    })
+    });
   }
 
   function onDragEnd(result) {
