@@ -1,11 +1,16 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+import jwt
+from passlib.hash import bcrypt
+from typing import Dict
 from pydantic import BaseModel
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from tortoise import fields
 from tortoise.contrib.fastapi import register_tortoise
 from tortoise.contrib.pydantic import pydantic_model_creator
 from tortoise.models import Model
-from typing import Dict
+
+JWT_SECRET = 'myjwtsecret'
 
 app = FastAPI()
 
@@ -26,28 +31,23 @@ class Task(BaseModel):
   id: str
   content: str
 
-
 class Tasks(BaseModel): 
-  __root__: Dict[str, Task]
-  # 예제에서는 dict[str, Task] 사용
-  # -> from typing import Dict 입력 후, dict를 Dict로 수정
-
+  __root__: Dict[str, Task] 
+  # __root__: dict[str, Task] -> Error
+  # from typing import Dict 입력 후, dict를 Dict로 수정
 
 class Column(BaseModel):
   id: str
   title: str
   taskIds: list
 
-
 class Columns(BaseModel):
   __root__: Dict[str, Column]
-
 
 class Board(BaseModel):
   tasks: Tasks
   columns: Columns
   columnOrder: list
-
 
 class User(Model):
   id = fields.IntField(pk=True)
@@ -55,8 +55,19 @@ class User(Model):
   password = fields.CharField(200)
   board = fields.JSONField(default={"tasks": {}, "columns": {}, "columnOrder": []})
 
+  def verify_password(self, password):
+    return bcrypt.verify(password, self.password)
+
 User_Pydantic = pydantic_model_creator(User, name='User')
 UserIn_Pydantic = pydantic_model_creator(User, name='UserIn', exclude_readonly=True, exclude=('board', ))
+
+async def authenticate_user(username: str, password: str):
+  user = await User.get(username=username)
+  if not user:
+    return False
+  if not user.verify_password(password):
+    return False
+  return user
 
 @app.get('/board')
 async def get_board():
@@ -70,6 +81,29 @@ async def save_board(board: Board):
   await user.save()
 
   return {"status": "success"}
+
+@app.post('/users')
+async def create_user(user_in: UserIn_Pydantic):
+  user = User(username=user_in.username, password=bcrypt.hash(user_in.password))
+  await user.save()
+  user_obj = await User_Pydantic.from_tortoise_orm(user)
+
+  token = jwt.encode(user_obj.dict(), JWT_SECRET)
+  return {'access_token': token}
+
+@app.post('/token')
+async def generate_token(form_data: OAuth2PasswordRequestForm = Depends()):
+  user = await authenticate_user(form_data.username, form_data.password)
+
+  if not user:
+    raise HTTPException(
+      status_code=status.HTTP_401_UNAUTHORIZED,
+      detail='Invaild Username or Password'
+    )
+
+  user_obj = await User_Pydantic.from_tortoise_orm(user)
+  token = jwt.encode(user_obj.dict(), JWT_SECRET)
+  return {'access_token': token}
 
 register_tortoise(
   app,
