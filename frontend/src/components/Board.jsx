@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import Column from './Column';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd'
 import AddColumn from './AddColumn';
+import { useNavigate } from 'react-router-dom';
 
 const Container = styled.div`
   display: flex;
@@ -13,6 +14,7 @@ const Container = styled.div`
 function Board(props) {
   const initialData = { tasks: {}, columns: {}, columnOrder: [] };
   const [board, setBoard] = useState(initialData)
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchBoard().then(
@@ -27,7 +29,7 @@ function Board(props) {
   async function fetchBoard() {
     const response = await fetch('http://localhost:8000/board', {
       headers: {
-        'Authorization': 'Bearer ' + props.token
+        "Authorization": "Bearer " + props.token
       }
     });
     const data = await response.json();
@@ -38,10 +40,10 @@ function Board(props) {
   /**나중에 설명 볼때 편한 주석*/
   async function saveBoard() {
     const response = await fetch('http://localhost:8000/board', {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + props.token
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + props.token
       },
       body: JSON.stringify(board)
     });
@@ -126,23 +128,29 @@ function Board(props) {
   }
 
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <AddColumn board={board} setBoard={setBoard} />
-      <Droppable droppableId='all-columns' direction='horizontal' type='column'>
-        {provided => (
-          <Container {...provided.droppableProps} ref={provided.innerRef}>
-            {
-              board.columnOrder.map((columnId, index) => {
-                const column = board.columns[columnId];
-                const tasks = column.taskIds.map(taskIds => board.tasks[taskIds]);
-                return <Column key={column.id} column={column} tasks={tasks} index={index} board={board} setBoard={setBoard} />;
-              })
-            }
-            {provided.placeholder}
-          </Container>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <>
+      {
+        !props.token ?
+          navigate('/register') :
+          <DragDropContext onDragEnd={onDragEnd}>
+            <AddColumn board={board} setBoard={setBoard} />
+            <Droppable droppableId='all-columns' direction='horizontal' type='column'>
+              {provided => (
+                <Container {...provided.droppableProps} ref={provided.innerRef}>
+                  {
+                    board.columnOrder.map((columnId, index) => {
+                      const column = board.columns[columnId];
+                      const tasks = column.taskIds.map(taskIds => board.tasks[taskIds]);
+                      return <Column key={column.id} column={column} tasks={tasks} index={index} board={board} setBoard={setBoard} />;
+                    })
+                  }
+                  {provided.placeholder}
+                </Container>
+              )}
+            </Droppable>
+          </DragDropContext>
+      }
+    </>
   );
 };
 

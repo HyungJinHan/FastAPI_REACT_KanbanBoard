@@ -22,10 +22,10 @@ function Register(props) {
       password: password
     };
 
-    const response = await fetch('/users', {
-      method: 'POST',
+    const response = await fetch('http://localhost:8000/users', {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(formData)
     });
@@ -39,7 +39,7 @@ function Register(props) {
       onSubmit={handleSubmit}
     >
       <p>
-        Username
+        Username&nbsp;&nbsp;
         <input
           type='text'
           onChange={(e) => {
@@ -48,7 +48,7 @@ function Register(props) {
         />
       </p>
       <p>
-        Passsword
+        Passsword&nbsp;&nbsp;
         <input
           type='password'
           onChange={(e) => {
@@ -57,7 +57,7 @@ function Register(props) {
         />
       </p>
       <p>
-        <input type='button' value='Register' />
+        <button>Register</button>
       </p>
     </form>
   );

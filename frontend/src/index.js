@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import Board from './components/Board';
-import { BrowserRouter, redirect, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Register from './components/Register';
 
 const App = () => {
@@ -10,13 +10,8 @@ const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={
-          !token ?
-            redirect('/register') :
-            <Board token={token} />
-        }
-        />
         <Route path='/register' element={<Register setToken={setToken} />} />
+        <Route path='/' element={<Board token={token} />} />
       </Routes>
     </BrowserRouter>
   );
